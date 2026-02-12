@@ -14,6 +14,11 @@ import {
 } from "../src/common/error.js";
 import { parseArray, parseBoolean } from "../src/common/ops.js";
 import { renderError } from "../src/common/render.js";
+import {
+  validateEnum,
+  VALID_TOP_LANG_LAYOUTS,
+  VALID_STATS_FORMATS,
+} from "../src/common/validate.js";
 import { fetchTopLanguages } from "../src/fetchers/top-languages.js";
 import { isLocaleAvailable } from "../src/translations.js";
 
@@ -45,17 +50,13 @@ export default async (req, res) => {
   } = req.query;
   res.setHeader("Content-Type", "image/svg+xml");
 
+  const colors = { title_color, text_color, bg_color, border_color, theme };
+
   const access = guardAccess({
     res,
     id: username,
     type: "username",
-    colors: {
-      title_color,
-      text_color,
-      bg_color,
-      border_color,
-      theme,
-    },
+    colors,
   });
   if (!access.isPassed) {
     return access.result;
@@ -66,55 +67,29 @@ export default async (req, res) => {
       renderError({
         message: "Something went wrong",
         secondaryMessage: "Locale not found",
-        renderOptions: {
-          title_color,
-          text_color,
-          bg_color,
-          border_color,
-          theme,
-        },
+        renderOptions: colors,
       }),
     );
   }
 
-  if (
-    layout !== undefined &&
-    (typeof layout !== "string" ||
-      !["compact", "normal", "donut", "donut-vertical", "pie"].includes(layout))
-  ) {
-    return res.send(
-      renderError({
-        message: "Something went wrong",
-        secondaryMessage: "Incorrect layout input",
-        renderOptions: {
-          title_color,
-          text_color,
-          bg_color,
-          border_color,
-          theme,
-        },
-      }),
-    );
+  const layoutCheck = validateEnum({
+    value: layout,
+    allowed: VALID_TOP_LANG_LAYOUTS,
+    paramName: "layout",
+    colors,
+  });
+  if (!layoutCheck.isValid) {
+    return res.send(layoutCheck.errorSvg);
   }
 
-  if (
-    stats_format !== undefined &&
-    (typeof stats_format !== "string" ||
-      !["bytes", "percentages"].includes(stats_format))
-  ) {
-    return res.send(
-      renderError({
-        message: "Something went wrong",
-        secondaryMessage: "Incorrect stats_format input",
-        renderOptions: {
-          title_color,
-          text_color,
-          bg_color,
-          border_color,
-          theme,
-        },
-      }),
-    );
+  const formatCheck = validateEnum({
+    value: stats_format,
+    allowed: VALID_STATS_FORMATS,
+    paramName: "stats_format",
+    colors,
+  });
+  if (!formatCheck.isValid) {
+    return res.send(formatCheck.errorSvg);
   }
 
   try {
