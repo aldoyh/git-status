@@ -65,3 +65,23 @@ export type WakaTimeOptions = CommonOptions & {
 export type GistCardOptions = CommonOptions & {
   show_owner: boolean;
 };
+
+/**
+ * Colors resolved from theme and user overrides.
+ */
+export type CardColors = {
+  titleColor: string;
+  iconColor: string;
+  textColor: string;
+  bgColor: string | string[];
+  borderColor: string;
+  ringColor: string;
+};
+
+/**
+ * Validation result from centralized validators.
+ */
+export type ValidationResult = {
+  isValid: boolean;
+  errorSvg?: string;
+};

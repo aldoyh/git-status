@@ -19,10 +19,12 @@ export type RepositoryData = {
     color: string;
     id: string;
     name: string;
-  };
+  } | null;
   forkCount: number;
   starCount: number;
 };
+
+export type RankLevel = "S" | "A+" | "A" | "A-" | "B+" | "B" | "B-" | "C";
 
 export type StatsData = {
   name: string;
@@ -36,7 +38,7 @@ export type StatsData = {
   totalDiscussionsStarted: number;
   totalDiscussionsAnswered: number;
   contributedTo: number;
-  rank: { level: string; percentile: number };
+  rank: { level: RankLevel; percentile: number };
 };
 
 export type Lang = {
@@ -47,29 +49,26 @@ export type Lang = {
 
 export type TopLangData = Record<string, Lang>;
 
+/**
+ * Shared type for WakaTime activity entries (languages, editors, categories, OS).
+ */
+export type WakaTimeActivityEntry = {
+  digital: string;
+  hours: number;
+  minutes: number;
+  name: string;
+  percent: number;
+  text: string;
+  total_seconds: number;
+};
+
 export type WakaTimeData = {
-  categories: {
-    digital: string;
-    hours: number;
-    minutes: number;
-    name: string;
-    percent: number;
-    text: string;
-    total_seconds: number;
-  }[];
+  categories: WakaTimeActivityEntry[];
   daily_average: number;
   daily_average_including_other_language: number;
   days_including_holidays: number;
   days_minus_holidays: number;
-  editors: {
-    digital: string;
-    hours: number;
-    minutes: number;
-    name: string;
-    percent: number;
-    text: string;
-    total_seconds: number;
-  }[];
+  editors: WakaTimeActivityEntry[];
   holidays: number;
   human_readable_daily_average: string;
   human_readable_daily_average_including_other_language: string;
@@ -82,24 +81,8 @@ export type WakaTimeData = {
   is_other_usage_visible: boolean;
   is_stuck: boolean;
   is_up_to_date: boolean;
-  languages: {
-    digital: string;
-    hours: number;
-    minutes: number;
-    name: string;
-    percent: number;
-    text: string;
-    total_seconds: number;
-  }[];
-  operating_systems: {
-    digital: string;
-    hours: number;
-    minutes: number;
-    name: string;
-    percent: number;
-    text: string;
-    total_seconds: number;
-  }[];
+  languages: WakaTimeActivityEntry[];
+  operating_systems: WakaTimeActivityEntry[];
   percent_calculated: number;
   range: string;
   status: string;

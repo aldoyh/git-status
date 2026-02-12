@@ -169,7 +169,8 @@ describe("Test /api/top-langs", () => {
     expect(res.send).toHaveBeenCalledWith(
       renderError({
         message: "Something went wrong",
-        secondaryMessage: "Incorrect layout input",
+        secondaryMessage:
+          "Invalid layout: must be one of compact, normal, donut, donut-vertical, pie",
       }),
     );
   });

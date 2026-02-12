@@ -45,8 +45,8 @@ const parseArray = (str) => {
  * @returns {number} The clamped number.
  */
 const clampValue = (number, min, max) => {
-  // @ts-ignore
-  if (Number.isNaN(parseInt(number, 10))) {
+  const parsed = parseInt(String(number), 10);
+  if (Number.isNaN(parsed)) {
     return min;
   }
   return Math.max(min, Math.min(number, max));
@@ -69,19 +69,16 @@ const lowercaseTrim = (name) => name.toLowerCase().trim();
  * @returns {Array<T>} Array of languages split in two columns.
  */
 const chunkArray = (arr, perChunk) => {
-  return arr.reduce((resultArray, item, index) => {
-    const chunkIndex = Math.floor(index / perChunk);
-
-    if (!resultArray[chunkIndex]) {
-      // @ts-ignore
-      resultArray[chunkIndex] = []; // start a new chunk
+  /** @type {Array<Array<T>>} */
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    const chunkIndex = Math.floor(i / perChunk);
+    if (!result[chunkIndex]) {
+      result[chunkIndex] = [];
     }
-
-    // @ts-ignore
-    resultArray[chunkIndex].push(item);
-
-    return resultArray;
-  }, []);
+    result[chunkIndex].push(arr[i]);
+  }
+  return result;
 };
 
 /**
