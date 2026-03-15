@@ -49,10 +49,8 @@ jobs:
         env:
           CI: true
 
-      - name: Run Script
-        uses: skx/github-action-tester@e29768ff4ff67be9d1fdbccd8836ab83233bebb1 # v0.10.0
-        with:
-          script: ./scripts/push-theme-readme.sh
+      - name: Push updated theme readme
+        run: ./scripts/push-theme-readme.sh
         env:
           CI: true
           PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
