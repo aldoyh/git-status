@@ -27,6 +27,8 @@
     "preview-theme": "node scripts/preview-theme",
     "close-stale-theme-prs": "node scripts/close-stale-theme-prs",
     "generate-langs-json": "node scripts/generate-langs-json",
+    "generate-cards": "node scripts/generate-cards.js",
+    "generate-preview": "node scripts/generate-preview.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",

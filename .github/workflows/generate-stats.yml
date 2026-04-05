@@ -1,0 +1,76 @@
+name: Generate Stats Images
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC.
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      username:
+        description: "GitHub username to generate stats for (defaults to repo owner)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    name: Generate stats cards
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Determine username
+        id: user
+        run: |
+          if [ -n "${{ github.event.inputs.username }}" ]; then
+            echo "name=${{ github.event.inputs.username }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${{ github.repository_owner }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate stats cards
+        run: node scripts/generate-cards.js "${{ steps.user.outputs.name }}" generated
+        env:
+          PAT_1: ${{ secrets.PAT_1 || secrets.GITHUB_TOKEN }}
+
+      - name: Verify generated files
+        run: |
+          echo "Generated files:"
+          ls -lh generated/
+          for f in generated/*.svg; do
+            if ! head -c 200 "$f" | grep -q '<svg\|<?xml'; then
+              echo "❌ $f does not appear to be a valid SVG"
+              cat "$f"
+              exit 1
+            fi
+            echo "✅ $f is valid"
+          done
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add generated/
+          # Only commit if there are actual changes.
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update generated stats images [skip ci]"
+            git push
+          fi

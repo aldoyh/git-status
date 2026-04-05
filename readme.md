@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://res.cloudinary.com/anuraghazra/image/upload/v1594908242/logo_ccswme.svg" width="100px" alt="GitHub Readme Stats" />
   <h1 style="font-size: 28px; margin: 10px 0;">GitHub Readme Stats</h1>
-  <p>Get dynamically generated GitHub stats on your READMEs!</p>
+  <p>Generate beautiful GitHub stats cards — no external API required.</p>
 </div>
 
 <p align="center">
@@ -23,12 +23,21 @@
   <a href="https://securityscorecards.dev/viewer/?uri=github.com/anuraghazra/github-readme-stats">
     <img alt="OpenSSF Scorecard" src="https://api.securityscorecards.dev/projects/github.com/anuraghazra/github-readme-stats/badge" />
   </a>
-  <br />
-  <br />
-  <a href="https://vercel.com?utm\_source=github\_readme\_stats\_team\&utm\_campaign=oss">
-    <img src="./powered-by-vercel.svg"/>
-  </a>
 </p>
+
+<div align="center">
+  <h3>Generated Output Preview</h3>
+  <p>
+    <img src="./generated/stats.svg" alt="Stats Card (radical theme)" width="400" />
+    <img src="./generated/stats-dark.svg" alt="Stats Card (dark theme)" width="400" />
+  </p>
+  <p>
+    <img src="./generated/top-langs.svg" alt="Top Languages (compact)" width="300" />
+    <img src="./generated/top-langs-donut.svg" alt="Top Languages (donut)" width="300" />
+    <img src="./generated/top-langs-pie.svg" alt="Top Languages (pie)" width="300" />
+  </p>
+  <p><em>Cards generated locally via <code>npm run generate-preview</code> — no API calls needed.</em></p>
+</div>
 
 <p align="center">
   <a href="#all-demos">View Demo</a>
@@ -48,6 +57,8 @@
 <details>
 <summary>Table of contents (Click to show)</summary>
 
+- [Quick Start (GitHub Actions)](#quick-start-github-actions)
+- [Local Generation (CLI)](#local-generation-cli)
 - [GitHub Stats Card](#github-stats-card)
     - [Hiding individual stats](#hiding-individual-stats)
     - [Showing additional individual stats](#showing-additional-individual-stats)
@@ -86,10 +97,10 @@
     - [Pinning repositories](#pinning-repositories)
 - [Deploy on your own](#deploy-on-your-own)
   - [GitHub Actions (Recommended)](#github-actions-recommended)
-  - [Self-hosted (Vercel/Other) (Recommended)](#self-hosted-vercelother-recommended)
+  - [Local CLI](#local-cli)
+  - [Self-hosted (Vercel/Other)](#self-hosted-vercelother)
     - [First step: get your Personal Access Token (PAT)](#first-step-get-your-personal-access-token-pat)
     - [On Vercel](#on-vercel)
-    - [:film\_projector: Check Out Step By Step Video Tutorial By @codeSTACKr](#film_projector-check-out-step-by-step-video-tutorial-by-codestackr)
     - [On other platforms](#on-other-platforms)
     - [Available environment variables](#available-environment-variables)
   - [Keep your fork up to date](#keep-your-fork-up-to-date)
@@ -98,13 +109,55 @@
 
 # Important Notices <!-- omit in toc -->
 
-> [!IMPORTANT]
-> The public Vercel instance at `https://github-readme-stats.vercel.app/api` is best-effort and can be unreliable due to rate limits and traffic spikes (see [#1471](https://github.com/anuraghazra/github-readme-stats/issues/1471)). We use caching to improve stability (see [common options](#common-options)), but for reliable cards we recommend [self-hosting](#deploy-on-your-own) (Vercel or other) or using the [GitHub Actions workflow](#github-actions-recommended) to generate cards in your [profile repository](https://docs.github.com/en/account-and-profile/how-tos/profile-customization/managing-your-profile-readme).
+> [!IMPORTANT]\
+> Since the GitHub API only [allows 5k requests per hour per user account](https://docs.github.com/en/graphql/overview/resource-limitations), the public Vercel instance hosted on `https://github-readme-stats.vercel.app/api` could possibly hit the rate limiter (see [#1471](https://github.com/anuraghazra/github-readme-stats/issues/1471)). **We recommend using GitHub Actions or the local CLI instead**, as they use your own token and avoid shared rate limits entirely.
 
 <img alt="Uptime Badge" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fgithub-readme-stats-git-monitoring-github-readme-stats-team.vercel.app%2Fapi%2Fstatus%2Fup%3Ftype%3Dshields">
 
 > [!IMPORTANT]
 > We're a small team, and to prioritize, we rely on upvotes :+1:. We use the Top Issues dashboard for tracking community demand (see [#1935](https://github.com/anuraghazra/github-readme-stats/issues/1935)). Do not hesitate to upvote the issues and pull requests you are interested in. We will work on the most upvoted first.
+
+# Quick Start (GitHub Actions)
+
+The **recommended** way to use this project is through GitHub Actions. This generates SVG stats cards using the project's own code — no external Vercel API needed.
+
+**1.** Create a [Personal Access Token](https://github.com/settings/tokens?type=beta) with `read:user` and `repo` permissions.
+
+**2.** Add it as a repository secret named `PAT_1` in **Settings > Secrets > Actions**.
+
+**3.** Copy `.github/workflows/generate-stats.yml` into your repo (included in this project), or trigger the existing workflow via **Actions > Generate Stats Images > Run workflow**.
+
+**4.** The generated SVGs are committed to the `generated/` directory. Use them in your README:
+
+```md
+![Stats](generated/stats.svg)
+![Stats Dark](generated/stats-dark.svg)
+![Top Languages](generated/top-langs.svg)
+![Top Languages Donut](generated/top-langs-donut.svg)
+![Top Languages Pie](generated/top-langs-pie.svg)
+```
+
+# Local Generation (CLI)
+
+Generate cards locally without any server:
+
+```bash
+# Clone and install
+git clone https://github.com/anuraghazra/github-readme-stats.git
+cd github-readme-stats && npm install
+
+# Set your GitHub token
+export PAT_1=ghp_your_token_here
+
+# Generate cards for a user
+npm run generate-cards -- <username> <output-dir>
+```
+
+**Preview mode** (no token required — uses mock data to verify rendering):
+
+```bash
+npm run generate-preview
+```
 
 # GitHub Stats Card
 
@@ -796,54 +849,30 @@ By default, GitHub does not lay out the cards side by side. To do that, you can 
 
 </details>
 
-# Deploy on your own (recommended)
+# Deploy on your own
 
-Because the public endpoint is [not reliable](#Important-Notices), we recommend self-deployment via GitHub Actions or your own hosted instance. GitHub Actions is the simplest setup with static SVGs stored in your repo but less frequent updates, while self-hosting takes more work and can serve fresher stats (with caching).
+## GitHub Actions (Recommended)
 
-## GitHub Actions
+The simplest and most reliable approach — no external hosting needed. GitHub Actions runs `scripts/generate-cards.js` directly, which uses the project's fetchers and renderers to produce SVG cards.
 
-GitHub Actions generates static SVGs and avoids per-request API calls. By default it uses `GITHUB_TOKEN` (public stats only), for private stats, set a [PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) as a secret and pass it to the action instead.
+**Why this is recommended:**
+- No external API dependency (no Vercel, no rate limit sharing)
+- Uses your own GitHub token (full rate limit)
+- Cards are committed directly to your repo as static SVGs
+- Zero hosting cost, zero maintenance
 
-Create `/.github/workflows/grs.yml` in your profile repo (`USERNAME/USERNAME`):
+See the [Quick Start](#quick-start-github-actions) section for full setup instructions. You can customize which cards are generated by editing `scripts/generate-cards.js`.
 
-```yaml
-name: Update README cards
+## Local CLI
 
-on:
-  schedule:
-    - cron: "0 3 * * *"
-  workflow_dispatch:
+For one-off generation or development, use the CLI directly:
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Generate stats card
-        uses: readme-tools/github-readme-stats-action@v1
-        with:
-          card: stats
-          options: username=${{ github.repository_owner }}&show_icons=true
-          path: profile/stats.svg
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Commit cards
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git add profile/*.svg
-          git commit -m "Update README cards" || exit 0
-          git push
+```bash
+export PAT_1=ghp_your_token
+npm run generate-cards -- <username> <output-dir>
 ```
 
-Then embed from your profile README:
-
-```md
-![Stats](./profile/stats.svg)
-```
-
-See more options and examples in the [GitHub Readme Stats Action README](https://github.com/readme-tools/github-readme-stats-action#readme).
+See [Local Generation](#local-generation-cli) for details.
 
 ## Self-hosted (Vercel/Other)
 
@@ -948,6 +977,11 @@ GitHub Readme Stats provides several environment variables that can be used to c
   </thead>
   <tbody>
     <tr>
+      <td><code>PAT_1</code>, <code>PAT_2</code>, ...</td>
+      <td>GitHub Personal Access Tokens. The app rotates through all available tokens for higher rate limits.</td>
+      <td>GitHub PAT string (at least one required)</td>
+    </tr>
+    <tr>
       <td><code>CACHE_SECONDS</code></td>
       <td>Sets the cache duration in seconds for the generated cards. This variable takes precedence over the default cache timings for the public instance. If this variable is not set, the default cache duration is 24 hours (86,400 seconds).</td>
       <td>Any positive integer or <code>0</code> to disable caching</td>
@@ -998,8 +1032,6 @@ However, if you are using this project and are happy with it or just want to enc
 Thanks! :heart:
 
 ***
-
-[![https://vercel.com?utm\_source=github\_readme\_stats\_team\&utm\_campaign=oss](powered-by-vercel.svg)](https://vercel.com?utm_source=github_readme_stats_team\&utm_campaign=oss)
 
 Contributions are welcome! <3
 
